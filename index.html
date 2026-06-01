@@ -1,0 +1,2696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AirDosa — AI-Powered Instant Dosa Delivery Drones</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* -------------------------------------------------------------
+           DESIGN SYSTEM & VARIABLES
+           ------------------------------------------------------------- */
+        :root {
+            --bg-deep: #060913;
+            --bg-card: rgba(17, 24, 39, 0.7);
+            --bg-card-hover: rgba(26, 36, 57, 0.85);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --border-glass-glow: rgba(249, 115, 22, 0.4);
+            
+            /* Curated HSL Color Palettes */
+            --saffron: hsl(28, 100%, 55%);
+            --saffron-dark: hsl(15, 100%, 50%);
+            --saffron-glow: hsla(28, 100%, 55%, 0.45);
+            
+            --chutney: hsl(142, 65%, 45%);
+            --chutney-glow: hsla(142, 65%, 45%, 0.4);
+            
+            --sky: hsl(200, 90%, 55%);
+            --sky-glow: hsla(200, 90%, 55%, 0.4);
+            
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --text-saffron: #ffedd5;
+            
+            --font-display: 'Outfit', sans-serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
+            
+            --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            --transition-bounce: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* -------------------------------------------------------------
+           RESET & CORE STYLES
+           ------------------------------------------------------------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(28, 100%, 55%, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(200, 90%, 55%, 0.06) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, hsla(142, 65%, 45%, 0.05) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-deep);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            border: 2px solid var(--bg-deep);
+            transition: var(--transition-smooth);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--saffron);
+        }
+
+        /* Scroll Progress Bar */
+        #scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--saffron), var(--saffron-dark));
+            width: 0%;
+            z-index: 1001;
+            box-shadow: 0 0 10px var(--saffron-glow);
+        }
+
+        /* Helper Typography & Gradients */
+        h1, h2, h3, h4 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #fff 30%, var(--saffron) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .gradient-saffron {
+            background: linear-gradient(135deg, var(--saffron) 0%, var(--saffron-dark) 100%);
+        }
+
+        /* -------------------------------------------------------------
+           REVEAL ON SCROLL STYLES
+           ------------------------------------------------------------- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* -------------------------------------------------------------
+           NAVIGATION BAR
+           ------------------------------------------------------------- */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(6, 9, 19, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-glass);
+            transition: var(--transition-smooth);
+        }
+
+        header.scrolled {
+            padding: 0.75rem 0;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            background: rgba(6, 9, 19, 0.9);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition-smooth);
+        }
+
+        header.scrolled .nav-container {
+            padding: 0.75rem 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--text-main);
+            font-size: 1.5rem;
+            font-weight: 800;
+            font-family: var(--font-display);
+        }
+
+        .logo-svg {
+            width: 42px;
+            height: 42px;
+            filter: drop-shadow(0 0 8px var(--saffron-glow));
+            transition: var(--transition-bounce);
+        }
+
+        .logo:hover .logo-svg {
+            transform: rotate(15deg) scale(1.1);
+        }
+
+        .logo-text span {
+            color: var(--saffron);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: var(--transition-smooth);
+            position: relative;
+            padding: 0.25rem 0;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--saffron);
+            transition: var(--transition-smooth);
+            box-shadow: 0 0 8px var(--saffron-glow);
+        }
+
+        .nav-links a:hover {
+            color: var(--text-main);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-cta {
+            padding: 0.6rem 1.4rem;
+            border-radius: 50px;
+            border: 1px solid var(--saffron);
+            background: rgba(249, 115, 22, 0.1);
+            color: var(--saffron);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            font-family: var(--font-display);
+        }
+
+        .nav-cta:hover {
+            background: linear-gradient(135deg, var(--saffron) 0%, var(--saffron-dark) 100%);
+            color: #000;
+            box-shadow: 0 0 20px var(--saffron-glow);
+            transform: translateY(-2px);
+            border-color: transparent;
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            z-index: 1002;
+        }
+
+        .mobile-toggle span {
+            display: block;
+            width: 28px;
+            height: 3px;
+            background: var(--text-main);
+            border-radius: 3px;
+            transition: var(--transition-smooth);
+        }
+
+        /* -------------------------------------------------------------
+           HERO SECTION
+           ------------------------------------------------------------- */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding-top: 100px;
+            overflow: hidden;
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            align-items: center;
+            gap: 4rem;
+            width: 100%;
+        }
+
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.75rem;
+            z-index: 10;
+        }
+
+        .hero-badge {
+            align-self: flex-start;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-glass);
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--saffron);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            backdrop-filter: blur(8px);
+        }
+
+        .hero-badge span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--chutney);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--chutney-glow);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            line-height: 1.1;
+            font-weight: 800;
+        }
+
+        .hero-tagline {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 580px;
+            font-weight: 400;
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            text-decoration: none;
+            font-family: var(--font-display);
+            cursor: pointer;
+            transition: var(--transition-bounce);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--saffron) 0%, var(--saffron-dark) 100%);
+            color: #000;
+            box-shadow: 0 10px 25px -5px var(--saffron-glow);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 30px -5px var(--saffron-glow);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-main);
+            border: 1px solid var(--border-glass);
+            backdrop-filter: blur(8px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-4px);
+        }
+
+        /* -------------------------------------------------------------
+           CSS 3D DRONE DYNAMIC ILLUSTRATION
+           ------------------------------------------------------------- */
+        .hero-visual {
+            position: relative;
+            height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        .drone-wrapper {
+            position: relative;
+            width: 320px;
+            height: 280px;
+            transform-style: preserve-3d;
+            animation: droneHover 4s ease-in-out infinite;
+        }
+
+        @keyframes droneHover {
+            0% { transform: translateY(0) rotateX(5deg) rotateY(-5deg); }
+            50% { transform: translateY(-25px) rotateX(0deg) rotateY(5deg); }
+            100% { transform: translateY(0) rotateX(5deg) rotateY(-5deg); }
+        }
+
+        /* Shadow element beneath the drone */
+        .drone-shadow {
+            position: absolute;
+            bottom: 40px;
+            width: 180px;
+            height: 25px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 50%;
+            filter: blur(12px);
+            animation: shadowScale 4s ease-in-out infinite;
+        }
+
+        @keyframes shadowScale {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(0.75); opacity: 0.3; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+
+        /* Drone Main Body */
+        .drone-body {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 140px;
+            height: 48px;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), inset 0 2px 5px rgba(255, 255, 255, 0.15);
+            z-index: 10;
+        }
+
+        /* Core Dome / Eye */
+        .drone-dome {
+            position: absolute;
+            top: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 36px;
+            background: linear-gradient(180deg, var(--saffron), var(--saffron-dark));
+            border-radius: 30px 30px 0 0;
+            box-shadow: 0 0 15px var(--saffron-glow);
+            overflow: hidden;
+        }
+
+        .drone-eye {
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 25px;
+            height: 8px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #fff;
+            animation: eyePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes eyePulse {
+            0%, 100% { opacity: 0.7; filter: blur(1px); }
+            50% { opacity: 1; filter: blur(0px); }
+        }
+
+        /* Drone Arms / Wings */
+        .drone-arm {
+            position: absolute;
+            height: 8px;
+            background: linear-gradient(90deg, #334155, #1e293b);
+            border-radius: 4px;
+            z-index: 5;
+        }
+
+        .arm-front-left {
+            width: 120px;
+            top: 52%;
+            left: -40px;
+            transform: rotate(-25deg);
+        }
+
+        .arm-front-right {
+            width: 120px;
+            top: 52%;
+            right: -40px;
+            transform: rotate(25deg);
+        }
+
+        .arm-back-left {
+            width: 130px;
+            top: 42%;
+            left: -35px;
+            transform: rotate(-155deg);
+            background: linear-gradient(90deg, #1e293b, #0f172a);
+        }
+
+        .arm-back-right {
+            width: 130px;
+            top: 42%;
+            right: -35px;
+            transform: rotate(155deg);
+            background: linear-gradient(90deg, #1e293b, #0f172a);
+        }
+
+        /* Motors */
+        .drone-motor {
+            position: absolute;
+            width: 24px;
+            height: 28px;
+            background: #475569;
+            border: 2px solid #64748b;
+            border-radius: 4px;
+            top: -10px;
+        }
+
+        .arm-front-left .drone-motor { left: 0; }
+        .arm-front-right .drone-motor { right: 0; }
+        .arm-back-left .drone-motor { left: 0; }
+        .arm-back-right .drone-motor { right: 0; }
+
+        /* Rotors / Propellers */
+        .drone-rotor {
+            position: absolute;
+            width: 120px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            top: -12px;
+            left: -48px;
+            transform-origin: center center;
+            animation: rotorSpin 0.15s linear infinite;
+        }
+
+        .arm-front-right .drone-rotor { animation-duration: 0.12s; }
+        .arm-back-left .drone-rotor { animation-duration: 0.18s; }
+        .arm-back-right .drone-rotor { animation-duration: 0.14s; }
+
+        @keyframes rotorSpin {
+            0% { transform: rotateY(0deg) scaleX(1); }
+            100% { transform: rotateY(360deg) scaleX(1); }
+        }
+
+        /* Navigation Lights */
+        .beacon-light {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            bottom: -4px;
+        }
+
+        .light-red {
+            background: #ef4444;
+            left: 20px;
+            box-shadow: 0 0 10px #ef4444;
+            animation: blink 0.8s steps(2, start) infinite;
+        }
+
+        .light-green {
+            background: #22c55e;
+            right: 20px;
+            box-shadow: 0 0 10px #22c55e;
+            animation: blink 0.8s steps(2, start) infinite 0.4s;
+        }
+
+        @keyframes blink {
+            to { visibility: hidden; }
+        }
+
+        /* Saffron Thermal Dosa Flight Pod */
+        .thermal-pod {
+            position: absolute;
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 72px;
+            height: 52px;
+            background: linear-gradient(135deg, var(--saffron) 0%, var(--saffron-dark) 100%);
+            border-radius: 12px;
+            box-shadow: 0 8px 20px var(--saffron-glow), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 12;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .pod-latch {
+            width: 40px;
+            height: 6px;
+            background: #1e293b;
+            border-radius: 3px;
+            position: absolute;
+            top: 8px;
+        }
+
+        /* Steam Vents & Animated Steam */
+        .steam-vent {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            bottom: 4px;
+        }
+
+        .vent-left { left: 16px; }
+        .vent-right { right: 16px; }
+
+        .steam-bubble {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            filter: blur(2px);
+            bottom: -15px;
+            animation: steamUp 2.5s ease-out infinite;
+        }
+
+        .steam-1 { width: 8px; height: 8px; left: 20px; animation-delay: 0s; }
+        .steam-2 { width: 12px; height: 12px; left: 35px; animation-delay: 0.8s; }
+        .steam-3 { width: 6px; height: 6px; left: 48px; animation-delay: 1.4s; }
+
+        @keyframes steamUp {
+            0% { transform: translateY(0) scale(0.6); opacity: 0; }
+            10% { opacity: 0.6; }
+            70% { opacity: 0.1; }
+            100% { transform: translateY(-50px) scale(1.6); opacity: 0; }
+        }
+
+        /* -------------------------------------------------------------
+           FEATURES SECTION
+           ------------------------------------------------------------- */
+        .features {
+            padding: 8rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-header h2 {
+            font-size: 3rem;
+            line-height: 1.2;
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+            max-width: 600px;
+            font-size: 1.1rem;
+        }
+
+        .divider {
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--saffron), var(--chutney));
+            border-radius: 2px;
+            margin-top: 0.5rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            transition: var(--transition-smooth);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Card glowing hover border effect */
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--card-glow, var(--saffron-glow)), transparent 40%);
+            opacity: 0;
+            transition: var(--transition-smooth);
+            z-index: 0;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            background: var(--bg-card-hover);
+            border-color: var(--card-border-glow, var(--border-glass-glow));
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.4);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-card * {
+            z-index: 1;
+        }
+
+        .feature-icon-wrapper {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-glass);
+            color: var(--card-color, var(--saffron));
+            transition: var(--transition-smooth);
+        }
+
+        .feature-card:hover .feature-icon-wrapper {
+            background: var(--card-color-alpha, rgba(249, 115, 22, 0.15));
+            border-color: var(--card-color, var(--saffron));
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 0 15px var(--card-color-alpha, rgba(249, 115, 22, 0.15));
+        }
+
+        .feature-icon-wrapper svg {
+            width: 28px;
+            height: 28px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            color: var(--text-main);
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* -------------------------------------------------------------
+           INTERACTIVE SECTION: DOSA COCKPIT & FLIGHT SIMULATOR
+           ------------------------------------------------------------- */
+        .simulation {
+            padding: 8rem 2rem;
+            background: rgba(10, 15, 30, 0.4);
+            border-top: 1px solid var(--border-glass);
+            border-bottom: 1px solid var(--border-glass);
+            position: relative;
+        }
+
+        .sim-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 0.9fr 1.1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .sim-console {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            padding: 2.5rem;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .sim-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.6rem;
+            border-bottom: 1px solid var(--border-glass);
+            padding-bottom: 1rem;
+        }
+
+        .sim-title svg {
+            width: 26px;
+            height: 26px;
+            color: var(--saffron);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .form-group label {
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.02em;
+            color: var(--text-saffron);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-glass);
+            color: var(--text-muted);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: left;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .option-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: var(--text-main);
+        }
+
+        .option-btn.selected {
+            background: rgba(249, 115, 22, 0.08);
+            border-color: var(--saffron);
+            color: var(--saffron);
+            box-shadow: 0 0 10px rgba(249, 115, 22, 0.15);
+        }
+
+        .option-btn.selected::after {
+            content: '✓';
+            font-weight: bold;
+        }
+
+        /* Toggle Switches */
+        .toggle-switch-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            transition: var(--transition-smooth);
+        }
+
+        .toggle-label-desc {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .toggle-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .toggle-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .toggle-btn {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            background: #334155;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .toggle-btn::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #fff;
+            top: 3px;
+            left: 3px;
+            transition: var(--transition-smooth);
+        }
+
+        .toggle-btn.active {
+            background: var(--saffron);
+        }
+
+        .toggle-btn.active::after {
+            left: 27px;
+            background: #000;
+        }
+
+        /* Launch HUD */
+        .launch-hud {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 0.8rem;
+            color: var(--chutney);
+        }
+
+        .hud-line {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .hud-value {
+            color: #fff;
+        }
+
+        /* City Viewport */
+        .sim-viewport {
+            height: 480px;
+            background: linear-gradient(180deg, #090a15 0%, #151a30 100%);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.6);
+        }
+
+        /* City silhouettes */
+        .city-background {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 180px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 200' preserveAspectRatio='none'%3E%3Cpath d='M0,200 L0,120 L40,120 L40,150 L80,150 L80,80 L140,80 L140,160 L180,160 L180,100 L240,100 L240,140 L300,140 L300,50 L360,50 L360,160 L400,160 L400,110 L460,110 L460,130 L520,130 L520,70 L580,70 L580,150 L620,150 L620,90 L680,90 L680,120 L740,120 L740,60 L800,60 L800,160 L840,160 L840,100 L900,100 L900,140 L960,140 L960,110 L1000,110 L1000,200 Z' fill='%23080b18'/%3E%3C/svg%3E") bottom repeat-x;
+            opacity: 0.85;
+            z-index: 1;
+        }
+
+        .city-foreground {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 110px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 200' preserveAspectRatio='none'%3E%3Cpath d='M0,200 L0,150 L60,150 L60,170 L120,170 L120,130 L190,130 L190,160 L260,160 L260,120 L320,120 L320,145 L390,145 L390,110 L450,110 L450,175 L520,175 L520,140 L590,140 L590,160 L660,160 L660,115 L720,115 L720,155 L790,155 L790,130 L850,130 L850,165 L920,165 L920,140 L1000,140 L1000,200 Z' fill='%230b0e20'/%3E%3C/svg%3E") bottom repeat-x;
+            z-index: 2;
+            border-bottom: 6px solid #000;
+        }
+
+        /* Celestial bodies */
+        .neon-moon {
+            position: absolute;
+            top: 40px;
+            right: 50px;
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle at 15px 15px, #fff 0%, #cbd5e1 50%, #64748b 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            z-index: 0;
+        }
+
+        .stars-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(1px 1px at 20px 30px, #eee, transparent),
+                radial-gradient(1px 1px at 80px 120px, #fff, transparent),
+                radial-gradient(1.5px 1.5px at 140px 60px, #ffd700, transparent),
+                radial-gradient(1px 1px at 200px 220px, #eee, transparent),
+                radial-gradient(2px 2px at 280px 110px, #fff, transparent),
+                radial-gradient(1px 1px at 350px 40px, #eee, transparent),
+                radial-gradient(1px 1px at 420px 180px, #fff, transparent),
+                radial-gradient(1.5px 1.5px at 490px 80px, #eee, transparent);
+            background-repeat: repeat;
+            background-size: 550px 350px;
+            z-index: 0;
+            opacity: 0.6;
+        }
+
+        /* Flight Launch Platform (Left) */
+        .launch-pad-visual {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            width: 70px;
+            height: 10px;
+            background: #475569;
+            border-radius: 5px;
+            z-index: 3;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            border: 1px solid #64748b;
+        }
+
+        .launch-pad-visual::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 44px;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+        }
+
+        .launch-pad-light {
+            position: absolute;
+            top: -12px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--saffron);
+            box-shadow: 0 0 8px var(--saffron);
+            animation: padBlink 1s infinite alternate;
+        }
+
+        .pad-light-left { left: 8px; }
+        .pad-light-right { right: 8px; animation-delay: 0.5s; }
+
+        @keyframes padBlink {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        /* Balcony Destination Platform (Right) */
+        .balcony-visual {
+            position: absolute;
+            bottom: 75px;
+            right: 0;
+            width: 75px;
+            height: 45px;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            border-left: 3px solid var(--chutney);
+            border-top: 3px solid var(--chutney);
+            border-bottom: 3px solid #1e293b;
+            border-radius: 8px 0 0 8px;
+            z-index: 3;
+            box-shadow: -5px 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Holographic Landing Ring */
+        .landing-ring {
+            position: absolute;
+            top: -4px;
+            left: 10px;
+            width: 50px;
+            height: 8px;
+            border: 1.5px solid var(--chutney);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--chutney-glow);
+            animation: ringPulse 1s infinite alternate;
+        }
+
+        @keyframes ringPulse {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            100% { transform: scale(1.1); opacity: 1; }
+        }
+
+        /* Winch Drop Wire */
+        .winch-wire {
+            position: absolute;
+            width: 2px;
+            background: rgba(34, 197, 94, 0.8);
+            box-shadow: 0 0 8px #22c55e;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            height: 0px;
+            transition: height 1s ease-in-out;
+            z-index: 2;
+        }
+
+        /* Sim Delivery Box */
+        .sim-box {
+            position: absolute;
+            bottom: -22px;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            width: 28px;
+            height: 20px;
+            background: linear-gradient(135deg, var(--saffron) 0%, var(--saffron-dark) 100%);
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.5s ease-in-out;
+        }
+
+        /* Simulator Flight Drone */
+        .sim-drone {
+            position: absolute;
+            bottom: 38px;
+            left: 36px;
+            width: 58px;
+            height: 24px;
+            background: #1e293b;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            z-index: 4;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            transform-origin: center center;
+            transition: left 0.1s linear, bottom 0.1s linear, transform 0.3s ease;
+        }
+
+        /* Miniature rotors for simulator drone */
+        .sim-drone-rotor {
+            position: absolute;
+            width: 26px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            top: -4px;
+            animation: simRotorSpin 0.1s linear infinite;
+        }
+
+        .sim-rotor-left { left: -4px; }
+        .sim-rotor-right { right: -4px; animation-duration: 0.08s; }
+
+        @keyframes simRotorSpin {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        /* Thruster glow effect */
+        .thruster-glow {
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 8px;
+            background: #f97316;
+            border-radius: 50%;
+            box-shadow: 0 0 12px #f97316, 0 0 20px #ef4444;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .sim-drone.flying .thruster-glow {
+            opacity: 1;
+            animation: firePulse 0.1s infinite alternate;
+        }
+
+        @keyframes firePulse {
+            0% { transform: translateX(-50%) scale(0.8); }
+            100% { transform: translateX(-50%) scale(1.3); }
+        }
+
+        /* Delivery Success Overlay Panel */
+        .sim-success-modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0;
+            pointer-events: none;
+            width: 320px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid var(--chutney);
+            border-radius: 20px;
+            padding: 1.75rem;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7), 0 0 20px var(--chutney-glow);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            transition: var(--transition-bounce);
+        }
+
+        .sim-success-modal.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            pointer-events: auto;
+        }
+
+        .success-checkmark {
+            width: 50px;
+            height: 50px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 2px solid var(--chutney);
+            color: var(--chutney);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 0 auto 1rem auto;
+            box-shadow: 0 0 15px var(--chutney-glow);
+            font-weight: bold;
+        }
+
+        .success-receipt {
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-glass);
+            border-radius: 10px;
+            padding: 0.75rem;
+            font-size: 0.75rem;
+            text-align: left;
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .success-receipt-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn-receipt {
+            margin-top: 1.25rem;
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 10px;
+            background: var(--chutney);
+            color: #000;
+            font-family: var(--font-display);
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-receipt:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        /* -------------------------------------------------------------
+           PRICING SECTION
+           ------------------------------------------------------------- */
+        .pricing {
+            padding: 8rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* Billing Toggle Slider */
+        .billing-toggle-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 4rem;
+        }
+
+        .billing-label {
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: var(--transition-smooth);
+        }
+
+        .billing-label.active {
+            color: var(--saffron);
+        }
+
+        .billing-toggle {
+            width: 60px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glass);
+            border-radius: 100px;
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition-smooth);
+        }
+
+        .billing-toggle::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: var(--saffron);
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: var(--transition-smooth);
+            box-shadow: 0 0 10px var(--saffron-glow);
+        }
+
+        .billing-toggle.annual::after {
+            left: 31px;
+        }
+
+        .save-badge {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid var(--chutney);
+            color: var(--chutney);
+            font-size: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 50px;
+            font-weight: 700;
+        }
+
+        /* Plans Grid */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 3rem;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .pricing-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 28px;
+            padding: 3.5rem 3rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            position: relative;
+            transition: var(--transition-smooth);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            overflow: hidden;
+        }
+
+        .pricing-card.premium-focus {
+            border-color: var(--saffron);
+            background: rgba(26, 36, 57, 0.75);
+            box-shadow: 0 20px 45px -10px rgba(249, 115, 22, 0.15);
+        }
+
+        /* Most Popular Ribbon Badge */
+        .popular-badge {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: linear-gradient(135deg, var(--saffron) 0%, var(--saffron-dark) 100%);
+            color: #000;
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 0.75rem;
+            padding: 0.4rem 0.9rem;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px var(--saffron-glow);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .plan-header {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .plan-name {
+            font-size: 1.75rem;
+            color: var(--text-main);
+        }
+
+        .plan-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .plan-price-box {
+            display: flex;
+            align-items: baseline;
+            gap: 0.25rem;
+            margin: 0.5rem 0;
+        }
+
+        .plan-currency {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .plan-price {
+            font-size: 3.5rem;
+            font-weight: 800;
+            font-family: var(--font-display);
+            color: var(--text-main);
+            line-height: 1;
+            transition: var(--transition-smooth);
+        }
+
+        .plan-period {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .plan-features-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            border-top: 1px solid var(--border-glass);
+            border-bottom: 1px solid var(--border-glass);
+            padding: 1.5rem 0;
+        }
+
+        .plan-feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .plan-feature-item svg {
+            width: 20px;
+            height: 20px;
+            color: var(--chutney);
+            flex-shrink: 0;
+        }
+
+        .plan-cta {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            text-decoration: none;
+            font-family: var(--font-display);
+            cursor: pointer;
+            transition: var(--transition-bounce);
+            text-align: center;
+        }
+
+        .plan-cta-standard {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-glass);
+            color: var(--text-main);
+        }
+
+        .plan-cta-standard:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-4px);
+        }
+
+        .plan-cta-premium {
+            background: linear-gradient(135deg, var(--saffron) 0%, var(--saffron-dark) 100%);
+            color: #000;
+            border: none;
+            box-shadow: 0 10px 20px var(--saffron-glow);
+        }
+
+        .plan-cta-premium:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 30px var(--saffron-glow);
+        }
+
+        /* -------------------------------------------------------------
+           FOOTER SECTION
+           ------------------------------------------------------------- */
+        footer {
+            background: rgba(4, 6, 12, 0.95);
+            border-top: 1px solid var(--border-glass);
+            padding: 5rem 2rem 2.5rem 2rem;
+            position: relative;
+        }
+
+        .footer-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr 0.8fr 1.2fr;
+            gap: 4rem;
+            margin-bottom: 4rem;
+        }
+
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .footer-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Mock System Status Panel */
+        .system-status-panel {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--chutney);
+            box-shadow: 0 0 10px var(--chutney);
+            animation: statusPulse 1.5s infinite alternate;
+        }
+
+        @keyframes statusPulse {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .footer-col {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .footer-col h4 {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .footer-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition-smooth);
+        }
+
+        .footer-links a:hover {
+            color: var(--saffron);
+            transform: translateX(4px);
+            display: inline-block;
+        }
+
+        /* Footer Newsletter Form */
+        .footer-newsletter {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .newsletter-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .newsletter-form {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .newsletter-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-glass);
+            border-radius: 50px;
+            padding: 0.75rem 1.25rem;
+            color: #fff;
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            outline: none;
+            transition: var(--transition-smooth);
+        }
+
+        .newsletter-input:focus {
+            border-color: var(--saffron);
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 0 10px var(--saffron-glow);
+        }
+
+        .newsletter-btn {
+            background: linear-gradient(135deg, var(--saffron) 0%, var(--saffron-dark) 100%);
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition-bounce);
+            color: #000;
+        }
+
+        .newsletter-btn:hover {
+            transform: scale(1.08) rotate(5deg);
+            box-shadow: 0 0 15px var(--saffron-glow);
+        }
+
+        .newsletter-btn svg {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2.5;
+        }
+
+        /* Copyright bar */
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 0 auto;
+            border-top: 1px solid var(--border-glass);
+            padding-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer-bottom-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-bottom-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: var(--transition-smooth);
+        }
+
+        .footer-bottom-links a:hover {
+            color: var(--text-main);
+        }
+
+        .bengaluru-love {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .heart-icon {
+            color: #ef4444;
+            display: inline-block;
+            animation: heartBeat 1.2s infinite;
+        }
+
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        /* -------------------------------------------------------------
+           FLOATING ORDER NOW BUTTON
+           ------------------------------------------------------------- */
+        #floating-order-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 999;
+            background: linear-gradient(135deg, var(--saffron) 0%, var(--saffron-dark) 100%);
+            border: none;
+            border-radius: 50px;
+            padding: 0.9rem 1.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: #000;
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(249, 115, 22, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+            transition: var(--transition-bounce);
+            text-decoration: none;
+            animation: floatingBounce 2.5s ease-in-out infinite;
+        }
+
+        #floating-order-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(249, 115, 22, 0.6);
+        }
+
+        #floating-order-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke-width: 2.5;
+        }
+
+        @keyframes floatingBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        /* -------------------------------------------------------------
+           RESPONSIVE MEDIA QUERIES
+           ------------------------------------------------------------- */
+        @media (max-width: 1024px) {
+            .hero h1 {
+                font-size: 3rem;
+            }
+            .hero-container {
+                gap: 2rem;
+            }
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .features-grid .feature-card:last-child {
+                grid-column: span 2;
+            }
+            .sim-container {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+            .pricing-grid {
+                gap: 2rem;
+            }
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 3rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            /* Mobile Nav Header */
+            .mobile-toggle {
+                display: flex;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 80px;
+                left: -100%;
+                width: 100%;
+                height: calc(100vh - 80px);
+                background: rgba(6, 9, 19, 0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                padding: 4rem 2rem;
+                gap: 2rem;
+                transition: var(--transition-smooth);
+                z-index: 999;
+                border-top: 1px solid var(--border-glass);
+            }
+
+            .nav-links.active {
+                left: 0;
+            }
+
+            .nav-cta {
+                width: 100%;
+                text-align: center;
+                margin-top: 1rem;
+            }
+
+            /* Mobile Hero Layout */
+            .hero-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+                padding-top: 60px;
+                padding-bottom: 60px;
+            }
+
+            .hero-badge {
+                align-self: center;
+            }
+
+            .hero h1 {
+                font-size: 2.75rem;
+            }
+
+            .hero-tagline {
+                margin: 0 auto;
+            }
+
+            .hero-actions {
+                justify-content: center;
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .hero-actions .btn {
+                width: 100%;
+            }
+
+            .hero-visual {
+                height: 380px;
+            }
+
+            .drone-wrapper {
+                width: 240px;
+                height: 200px;
+            }
+            .drone-shadow {
+                width: 130px;
+                bottom: 20px;
+            }
+            .drone-body {
+                width: 110px;
+                height: 38px;
+            }
+            .drone-dome {
+                width: 50px;
+                height: 28px;
+                top: -18px;
+            }
+            .thermal-pod {
+                width: 58px;
+                height: 42px;
+                bottom: -40px;
+            }
+            .arm-front-left { width: 90px; left: -30px; }
+            .arm-front-right { width: 90px; right: -30px; }
+            .arm-back-left { width: 95px; left: -25px; }
+            .arm-back-right { width: 95px; right: -25px; }
+
+            /* Other layouts */
+            .section-header h2 {
+                font-size: 2.25rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .features-grid .feature-card:last-child {
+                grid-column: span 1;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pricing-grid {
+                grid-template-columns: 1fr;
+                max-width: 480px;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: 1.5rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Scroll Progress Indicator -->
+    <div id="scroll-progress"></div>
+
+    <!-- ---------------------------------------------------------------
+         NAVIGATION HEADER
+         --------------------------------------------------------------- -->
+    <header id="nav-header">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <svg class="logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="42" stroke="url(#logoGrad)" stroke-width="6" />
+                    <!-- Mini Dosa Triangle -->
+                    <path d="M50 25 L75 68 L25 68 Z" fill="url(#dosaGrad)" stroke="#fff" stroke-width="2" />
+                    <!-- Drone arm hooks -->
+                    <path d="M22 35 C35 20, 65 20, 78 35" stroke="var(--saffron)" stroke-width="4" stroke-linecap="round"/>
+                    <circle cx="22" cy="35" r="4" fill="var(--chutney)"/>
+                    <circle cx="78" cy="35" r="4" fill="var(--chutney)"/>
+                    
+                    <defs>
+                        <linearGradient id="logoGrad" x1="0" y1="0" x2="100" y2="100">
+                            <stop offset="0%" stop-color="var(--saffron)" />
+                            <stop offset="100%" stop-color="var(--saffron-dark)" />
+                        </linearGradient>
+                        <linearGradient id="dosaGrad" x1="25" y1="25" x2="75" y2="68">
+                            <stop offset="0%" stop-color="#fffbeb" />
+                            <stop offset="50%" stop-color="var(--saffron)" />
+                            <stop offset="100%" stop-color="var(--saffron-dark)" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <div class="logo-text">Air<span>Dosa</span></div>
+            </a>
+
+            <nav>
+                <ul class="nav-links" id="nav-links">
+                    <li><a href="#features">The Science</a></li>
+                    <li><a href="#simulator">Deployer HUD</a></li>
+                    <li><a href="#pricing">Launch Subscriptions</a></li>
+                    <li><a href="#fleet" class="nav-cta">Launch Console</a></li>
+                </ul>
+            </nav>
+
+            <button class="mobile-toggle" id="mobile-toggle" aria-label="Toggle Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ---------------------------------------------------------------
+         HERO SECTION
+         --------------------------------------------------------------- -->
+    <section class="hero" id="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span></span> Bengaluru Airspace Live — 100% Clear
+                </div>
+                <h1>
+                    Piping Hot.<br>
+                    Golden Crisp.<br>
+                    <span class="gradient-text">Delivered from the Clouds.</span>
+                </h1>
+                <p class="hero-tagline">
+                    Say goodbye to soggy delivery containers. AirDosa combines autonomous AI-optimized navigation grids with pressurized steam-vented flight pods to swoop down and winch freshly roasted ghee dosas directly onto your balcony in under 10 minutes.
+                </p>
+                <div class="hero-actions">
+                    <a href="#simulator" class="btn btn-primary">
+                        Deploy Flight Pod
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                    </a>
+                    <a href="#features" class="btn btn-secondary">
+                        Explore Tech
+                    </a>
+                </div>
+            </div>
+
+            <!-- CSS Animated Drone Visual -->
+            <div class="hero-visual">
+                <div class="drone-wrapper">
+                    <!-- Front Left Arm -->
+                    <div class="drone-arm arm-front-left">
+                        <div class="drone-motor">
+                            <div class="drone-rotor"></div>
+                        </div>
+                    </div>
+                    <!-- Front Right Arm -->
+                    <div class="drone-arm arm-front-right">
+                        <div class="drone-motor">
+                            <div class="drone-rotor"></div>
+                        </div>
+                    </div>
+                    <!-- Back Left Arm -->
+                    <div class="drone-arm arm-back-left">
+                        <div class="drone-motor">
+                            <div class="drone-rotor"></div>
+                        </div>
+                    </div>
+                    <!-- Back Right Arm -->
+                    <div class="drone-arm arm-back-right">
+                        <div class="drone-motor">
+                            <div class="drone-rotor"></div>
+                        </div>
+                    </div>
+                    <!-- Central Body -->
+                    <div class="drone-body">
+                        <div class="drone-dome">
+                            <div class="drone-eye"></div>
+                        </div>
+                        <div class="beacon-light light-red"></div>
+                        <div class="beacon-light light-green"></div>
+                    </div>
+                    <!-- Thermal Delivery Pod -->
+                    <div class="thermal-pod">
+                        <div class="pod-latch"></div>
+                        <div class="steam-vent vent-left"></div>
+                        <div class="steam-vent vent-right"></div>
+                        <!-- Steam Bubbles -->
+                        <div class="steam-bubble steam-1"></div>
+                        <div class="steam-bubble steam-2"></div>
+                        <div class="steam-bubble steam-3"></div>
+                    </div>
+                </div>
+                <!-- Dynamic Hover Shadow -->
+                <div class="drone-shadow"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ---------------------------------------------------------------
+         3 FEATURE CARDS
+         --------------------------------------------------------------- -->
+    <section class="features reveal" id="features">
+        <div class="section-header">
+            <h2>The Science of Airborne Crunch</h2>
+            <div class="divider"></div>
+            <p>Our fleet of custom carbon-fiber hexacopters are designed for one precise mission: landing perfect culinary experiences at standard warp speed.</p>
+        </div>
+
+        <div class="features-grid">
+            <!-- Feature Card 1 -->
+            <div class="feature-card" style="--card-color: var(--chutney); --card-color-alpha: var(--chutney-glow); --card-glow: rgba(34, 197, 94, 0.15); --card-border-glow: rgba(34, 197, 94, 0.4);">
+                <div class="feature-icon-wrapper">
+                    <!-- AI Routing/Wind Vectors SVG -->
+                    <svg viewBox="0 0 24 24">
+                        <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
+                        <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
+                        <line x1="6" y1="6" x2="6.01" y2="6" />
+                        <line x1="6" y1="18" x2="6.01" y2="18" />
+                        <line x1="20" y1="6" x2="14" y2="6" />
+                        <path d="M14 18h6" />
+                    </svg>
+                </div>
+                <h3>Chutney-Jet AI Trajectories</h3>
+                <p>Advanced neural networks analyze Bengaluru's localized micro-drafts and tree branches in real-time. By computing wind drag variables, our drones fly in hyper-optimized paths ensuring flight time never exceeds 10 minutes.</p>
+            </div>
+
+            <!-- Feature Card 2 -->
+            <div class="feature-card" style="--card-color: var(--saffron); --card-color-alpha: var(--saffron-glow); --card-glow: rgba(249, 115, 22, 0.15); --card-border-glow: rgba(249, 115, 22, 0.4);">
+                <div class="feature-icon-wrapper">
+                    <!-- Thermal/Crisp Vents SVG -->
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                    </svg>
+                </div>
+                <h3>Crisp-Preserving Thermal Pods</h3>
+                <p>Standard containers lock in condensation, causing crucial sogginess. Our carbon-fiber flight pods employ active, humidity-sensing steam micro-vents and ceramic infrared heaters to maintain a crisp 78°C index until landing.</p>
+            </div>
+
+            <!-- Feature Card 3 -->
+            <div class="feature-card" style="--card-color: var(--sky); --card-color-alpha: var(--sky-glow); --card-glow: rgba(56, 189, 248, 0.15); --card-border-glow: rgba(56, 189, 248, 0.4);">
+                <div class="feature-icon-wrapper">
+                    <!-- Balcony Laser Landing SVG -->
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" />
+                        <circle cx="12" cy="12" r="6" />
+                        <circle cx="12" cy="12" r="2" />
+                    </svg>
+                </div>
+                <h3>Laser Balcony Target Lock</h3>
+                <p>No phone calls, no physical contact, no complex instructions. Drones lock onto highly precise coordinates, winching down your insulated delivery box onto windowsills, balconies, or landing pads with millimeter accuracy.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ---------------------------------------------------------------
+         INTERACTIVE DOSA DEPLOYER FLIGHT SIMULATOR
+         --------------------------------------------------------------- -->
+    <section class="simulation reveal" id="simulator">
+        <div class="section-header">
+            <h2>AirDosa Launch Cockpit</h2>
+            <div class="divider"></div>
+            <p>Customize your virtual drone loadout and test-fire our autopilot autonomous flight algorithms across the digital sky.</p>
+        </div>
+
+        <div class="sim-container">
+            <!-- Left Panel: Configuration Console -->
+            <div class="sim-console">
+                <div class="sim-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+                    Autopilot Controls
+                </div>
+
+                <!-- Customizer Option 1 -->
+                <div class="form-group">
+                    <label>Select Dosa Crafting</label>
+                    <div class="options-grid" id="dosa-selector">
+                        <button class="option-btn selected" data-dosa="Mysore Masala" data-crunch="98.5%">
+                            Classic Mysore Masala
+                        </button>
+                        <button class="option-btn" data-dosa="Ghee Podi Crunch" data-crunch="99.4%">
+                            Golden Ghee Podi
+                        </button>
+                        <button class="option-btn" data-dosa="Double Cheese Blast" data-crunch="95.2%">
+                            Double Cheese Blast
+                        </button>
+                        <button class="option-btn" data-dosa="High-Fiber Rava Craft" data-crunch="99.8%">
+                            Artisanal Crisp Rava
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Customizer Option 2 -->
+                <div class="form-group">
+                    <label>Chutney Payload Addons</label>
+                    <div class="options-grid" id="chutney-selector">
+                        <button class="option-btn selected" data-chutney="Mint & Coconut">
+                            Mint & Coconut duo
+                        </button>
+                        <button class="option-btn" data-chutney="Spicy Tomato Lava">
+                            Spicy Tomato Lava
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Customizer Option 3 -->
+                <div class="form-group">
+                    <label>Flight Mode Configuration</label>
+                    <div class="toggle-switch-container">
+                        <div class="toggle-label-desc">
+                            <span class="toggle-title">Hyper-Sonic Mach 2 Delivery</span>
+                            <span class="toggle-sub">Overclocks rotors to arrive in under 5 minutes (+₹99)</span>
+                        </div>
+                        <div class="toggle-btn" id="hyper-toggle"></div>
+                    </div>
+                </div>
+
+                <!-- Telemetry HUD -->
+                <div class="launch-hud">
+                    <div class="hud-line">
+                        <span>SYSTEM LOADOUT:</span>
+                        <span id="hud-loadout" class="hud-value">Mysore Masala</span>
+                    </div>
+                    <div class="hud-line">
+                        <span>EST. CRUNCH INDEX:</span>
+                        <span id="hud-crunch" class="hud-value" style="color: var(--saffron);">98.5%</span>
+                    </div>
+                    <div class="hud-line">
+                        <span>ALTITUDE PROFILE:</span>
+                        <span id="hud-alt" class="hud-value">45 Meters (AI-Safe)</span>
+                    </div>
+                    <div class="hud-line">
+                        <span>BAROMETRIC LOCK:</span>
+                        <span class="hud-value" style="color: #22c55e;">ONLINE (GPS_ACC_V2)</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" id="launch-sim-btn" style="width: 100%; justify-content: center; font-size: 1.1rem; padding: 1.1rem 2rem;">
+                    Delever Dosa Now
+                </button>
+            </div>
+
+            <!-- Right Panel: Night Sky City Canvas -->
+            <div class="sim-viewport">
+                <!-- Stars & celestial elements -->
+                <div class="stars-bg"></div>
+                <div class="neon-moon"></div>
+                
+                <!-- Buildings Silhouettes -->
+                <div class="city-background"></div>
+                <div class="city-foreground"></div>
+
+                <!-- Platforms -->
+                <div class="launch-pad-visual">
+                    <div class="launch-pad-light pad-light-left"></div>
+                    <div class="launch-pad-light pad-light-right"></div>
+                </div>
+                <div class="balcony-visual">
+                    <div class="landing-ring"></div>
+                </div>
+
+                <!-- AUTONOMOUS FLIGHT DRONE -->
+                <div class="sim-drone" id="sim-drone">
+                    <div class="sim-drone-rotor sim-rotor-left"></div>
+                    <div class="sim-drone-rotor sim-rotor-right"></div>
+                    <div class="thruster-glow"></div>
+                    <!-- Hanger for delivery box -->
+                    <div class="winch-wire" id="winch-wire">
+                        <div class="sim-box" id="sim-box"></div>
+                    </div>
+                </div>
+
+                <!-- SUCCESS HOLO-RECEIPT MODAL -->
+                <div class="sim-success-modal" id="sim-success">
+                    <div class="success-checkmark">✓</div>
+                    <h4 style="font-size: 1.4rem; color: #fff; margin-bottom: 0.5rem;">Delivery Completed!</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Autopilot winched container onto landing pad safely.</p>
+                    
+                    <div class="success-receipt">
+                        <div class="success-receipt-item">
+                            <span>PAYLOAD TYPE:</span>
+                            <span id="receipt-payload" style="color: var(--saffron);">Mysore Masala</span>
+                        </div>
+                        <div class="success-receipt-item">
+                            <span>CRUNCH INDEX:</span>
+                            <span id="receipt-crunch" style="color: var(--chutney);">98.5% (Perfect)</span>
+                        </div>
+                        <div class="success-receipt-item">
+                            <span>FLIGHT VELOCITY:</span>
+                            <span id="receipt-velocity">Mach 1.2 (Sub-optimal wind)</span>
+                        </div>
+                        <div class="success-receipt-item">
+                            <span>INSULATED TEMP:</span>
+                            <span style="color: #f43f5e;">76.8 °C</span>
+                        </div>
+                        <div class="success-receipt-item">
+                            <span>GRID STATUS:</span>
+                            <span style="color: #10b981;">Bengaluru West-6</span>
+                        </div>
+                    </div>
+
+                    <button class="btn-receipt" id="close-sim-btn">Configure Next Flight</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ---------------------------------------------------------------
+         PRICING SECTION
+         --------------------------------------------------------------- -->
+    <section class="pricing reveal" id="pricing">
+        <div class="section-header">
+            <h2>Choose Your Launch Frequency</h2>
+            <div class="divider"></div>
+            <p>Ready to automate your morning fuel? Lock in one of our high-speed breakfast subscription matrices below.</p>
+        </div>
+
+        <!-- Billing Cycle Switch -->
+        <div class="billing-toggle-wrapper">
+            <span class="billing-label active" id="label-monthly">Billed Monthly</span>
+            <button class="billing-toggle" id="billing-toggle-btn" aria-label="Toggle Billing Frequency"></button>
+            <span class="billing-label" id="label-annual">Billed Annually</span>
+            <span class="save-badge">Save 20%</span>
+        </div>
+
+        <div class="pricing-grid">
+            <!-- Plan 1 -->
+            <div class="pricing-card">
+                <div class="plan-header">
+                    <h3 class="plan-name">The Regular Flyover</h3>
+                    <p class="plan-desc">Perfect for weekend crunch enthusiasts and crisp casuals.</p>
+                </div>
+                <div class="plan-price-box">
+                    <span class="plan-currency">₹</span>
+                    <span class="plan-price" id="price-standard">999</span>
+                    <span class="plan-period">/ month</span>
+                </div>
+                <ul class="plan-features-list">
+                    <li class="plan-feature-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        12 premium hand-roasted dosas
+                    </li>
+                    <li class="plan-feature-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Standard 15-minute flight delivery
+                    </li>
+                    <li class="plan-feature-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Insulated active thermal flight pod
+                    </li>
+                    <li class="plan-feature-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Sambar & 2 fresh chutney pods included
+                    </li>
+                    <li class="plan-feature-item" style="color: var(--text-muted); opacity: 0.5;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted);"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        Priority autopilot routing (Mach-speeds)
+                    </li>
+                </ul>
+                <a href="#simulator" class="plan-cta plan-cta-standard">Engage Autopilot</a>
+            </div>
+
+            <!-- Plan 2 (Highlighted Premium Plan) -->
+            <div class="pricing-card premium-focus">
+                <span class="popular-badge">Most Deployed</span>
+                <div class="plan-header">
+                    <h3 class="plan-name">Sonic Crunch VIP</h3>
+                    <p class="plan-desc">For true high-tech foodies demanding rapid, daily crisp intake.</p>
+                </div>
+                <div class="plan-price-box">
+                    <span class="plan-currency">₹</span>
+                    <span class="plan-price" id="price-premium">2,499</span>
+                    <span class="plan-period">/ month</span>
+                </div>
+                <ul class="plan-features-list">
+                    <li class="plan-feature-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Unlimited dosas (Max 2 per day)
+                    </li>
+                    <li class="plan-feature-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Priority VIP hypersonic flight (< 8 mins)
+                    </li>
+                    <li class="plan-feature-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Multi-balcony coordinate tracking support
+                    </li>
+                    <li class="plan-feature-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Artisanal cheese/podi upgrade included
+                    </li>
+                    <li class="plan-feature-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Free Ghee pod premium enrichment
+                    </li>
+                </ul>
+                <a href="#simulator" class="plan-cta plan-cta-premium">Unlock VIP Airspace</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ---------------------------------------------------------------
+         FOOTER SECTION
+         --------------------------------------------------------------- -->
+    <footer id="fleet">
+        <div class="footer-grid">
+            <!-- Brand Column -->
+            <div class="footer-brand">
+                <a href="#" class="logo" style="font-size: 1.4rem;">
+                    <svg class="logo-svg" style="width: 36px; height:36px;" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="42" stroke="url(#logoGrad)" stroke-width="6" />
+                        <path d="M50 25 L75 68 L25 68 Z" fill="url(#dosaGrad)" stroke="#fff" stroke-width="2" />
+                    </svg>
+                    <div class="logo-text">Air<span>Dosa</span></div>
+                </a>
+                <p class="footer-desc">
+                    Re-imagining food logistics in India through the power of advanced automated navigation, telemetry, and high-fidelity thermal design.
+                </p>
+                <div class="system-status-panel">
+                    <span class="status-dot"></span>
+                    <span>Fleet Status: 184 Drones Active</span>
+                </div>
+            </div>
+
+            <!-- Col 1 -->
+            <div class="footer-col">
+                <h4>Aerospace</h4>
+                <ul class="footer-links">
+                    <li><a href="#features">Science of Crunch</a></li>
+                    <li><a href="#simulator">Simulator Cockpit</a></li>
+                    <li><a href="#features">Balcony Safety Specs</a></li>
+                    <li><a href="#pricing">Priority Grids</a></li>
+                </ul>
+            </div>
+
+            <!-- Col 2 -->
+            <div class="footer-col">
+                <h4>The Fleet</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Hexacopter Mk4</a></li>
+                    <li><a href="#">Thermal Pod Standard</a></li>
+                    <li><a href="#">Chutney Injectors</a></li>
+                    <li><a href="#">Acoustic Mufflers</a></li>
+                </ul>
+            </div>
+
+            <!-- Col 3: Newsletter -->
+            <div class="footer-col">
+                <h4>Join the Airspace</h4>
+                <div class="footer-newsletter">
+                    <p class="newsletter-desc">Get notified when we expand drone grids to your sector in Bengaluru.</p>
+                    <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Telemetry coordinates logged! You have joined the pre-launch launchlist 🚀'); this.reset();">
+                        <input type="email" placeholder="balcony_coords@domain.com" class="newsletter-input" required aria-label="Email Address">
+                        <button type="submit" class="newsletter-btn" aria-label="Sign Up">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Copyright -->
+        <div class="footer-bottom">
+            <div>
+                © 2026 AirDosa Technologies Pvt Ltd. All rights reserved.
+            </div>
+            <div class="bengaluru-love">
+                Made with <span class="heart-icon">💛</span>, Sambar, and AI in Bengaluru.
+            </div>
+            <div class="footer-bottom-links">
+                <a href="#">Privacy Protocol</a>
+                <a href="#">Winch Liability</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ---------------------------------------------------------------
+         FLOATING BOUNCY BUTTON
+         --------------------------------------------------------------- -->
+    <a href="#simulator" id="floating-order-btn">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+        </svg>
+        Order Now
+    </a>
+
+    <!-- ---------------------------------------------------------------
+         CORE INTERACTIVE JAVASCRIPT
+         --------------------------------------------------------------- -->
+    <script>
+        /* -------------------------------------------------------------
+           SCROLL PROGRESS & GLASS HEADER SCROLL TRIGGER
+           ------------------------------------------------------------- */
+        const scrollProgress = document.getElementById('scroll-progress');
+        const header = document.getElementById('nav-header');
+
+        window.addEventListener('scroll', () => {
+            // Scroll Progress Line
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (window.scrollY / height) * 100;
+            scrollProgress.style.width = scrolled + '%';
+
+            // Glass Header Background shift on scroll
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        /* -------------------------------------------------------------
+           MOBILE NAV BAR MENU TOGGLE
+           ------------------------------------------------------------- */
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const navLinks = document.getElementById('nav-links');
+
+        mobileToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            // Toggle hamburger bars to 'X' shape
+            const spans = mobileToggle.querySelectorAll('span');
+            spans[0].style.transform = navLinks.classList.contains('active') ? 'rotate(45deg) translate(6px, 6px)' : 'none';
+            spans[1].style.opacity = navLinks.classList.contains('active') ? '0' : '1';
+            spans[2].style.transform = navLinks.classList.contains('active') ? 'rotate(-45deg) translate(6px, -6px)' : 'none';
+        });
+
+        // Close mobile nav when clicking a link
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                const spans = mobileToggle.querySelectorAll('span');
+                spans[0].style.transform = 'none';
+                spans[1].style.opacity = '1';
+                spans[2].style.transform = 'none';
+            });
+        });
+
+        /* -------------------------------------------------------------
+           SCROLL OBSERVER FOR ENTRANCE REVEALS
+           ------------------------------------------------------------- */
+        const reveals = document.querySelectorAll('.reveal');
+        const observerOptions = {
+            root: null,
+            threshold: 0.15,
+            rootMargin: "0px 0px -50px 0px"
+        };
+
+        const revealObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        reveals.forEach(reveal => {
+            revealObserver.observe(reveal);
+        });
+
+        /* -------------------------------------------------------------
+           INTERACTIVE COCKPIT / CUSTOMIZER
+           ------------------------------------------------------------- */
+        const dosaButtons = document.querySelectorAll('#dosa-selector .option-btn');
+        const chutneyButtons = document.querySelectorAll('#chutney-selector .option-btn');
+        const hyperToggle = document.getElementById('hyper-toggle');
+        
+        // HUD Live Elements
+        const hudLoadout = document.getElementById('hud-loadout');
+        const hudCrunch = document.getElementById('hud-crunch');
+        const hudAlt = document.getElementById('hud-alt');
+
+        let selectedDosa = "Mysore Masala";
+        let selectedCrunch = "98.5%";
+        let selectedChutney = "Mint & Coconut duo";
+        let isHyperMode = false;
+
+        // Customizer option listeners
+        dosaButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                dosaButtons.forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                selectedDosa = btn.getAttribute('data-dosa');
+                selectedCrunch = btn.getAttribute('data-crunch');
+                updateHUD();
+            });
+        });
+
+        chutneyButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                chutneyButtons.forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                selectedChutney = btn.getAttribute('data-chutney');
+                updateHUD();
+            });
+        });
+
+        hyperToggle.addEventListener('click', () => {
+            hyperToggle.classList.toggle('active');
+            isHyperMode = hyperToggle.classList.contains('active');
+            updateHUD();
+        });
+
+        function updateHUD() {
+            hudLoadout.textContent = selectedDosa;
+            hudCrunch.textContent = isHyperMode ? (parseFloat(selectedCrunch) + 0.3).toFixed(1) + "% ⚡" : selectedCrunch;
+            hudAlt.textContent = isHyperMode ? "18 Meters (Low-Alt Blitz)" : "45 Meters (AI-Safe)";
+            hudCrunch.style.color = isHyperMode ? "var(--chutney)" : "var(--saffron)";
+        }
+
+        /* -------------------------------------------------------------
+           DOSA DEPLOYER DRONE AUTOPILOT SIMULATION ENGINE
+           ------------------------------------------------------------- */
+        const launchBtn = document.getElementById('launch-sim-btn');
+        const simDrone = document.getElementById('sim-drone');
+        const winchWire = document.getElementById('winch-wire');
+        const simBox = document.getElementById('sim-box');
+        const successModal = document.getElementById('sim-success');
+        const closeBtn = document.getElementById('close-sim-btn');
+        
+        // Receipt text targets
+        const receiptPayload = document.getElementById('receipt-payload');
+        const receiptCrunch = document.getElementById('receipt-crunch');
+        const receiptVelocity = document.getElementById('receipt-velocity');
+
+        let isAnimating = false;
+
+        launchBtn.addEventListener('click', () => {
+            if (isAnimating) return;
+            isAnimating = true;
+
+            // Update button status
+            launchBtn.disabled = true;
+            launchBtn.textContent = "AUTOPILOT COORDS INJECTED...";
+            launchBtn.style.opacity = "0.7";
+
+            // Clean previous simulation states
+            successModal.classList.remove('show');
+            winchWire.style.height = "0px";
+            simBox.style.transform = "translateX(-50%) scale(0)";
+            
+            // Set drone class to flying to engage thruster flame
+            simDrone.classList.add('flying');
+
+            // Phase 1: Drone Take-off (Vertical ascent)
+            setTimeout(() => {
+                launchBtn.textContent = "DRONE LIFT-OFF SUCCESS...";
+                simDrone.style.bottom = "280px";
+                simDrone.style.transform = "rotate(8deg)";
+            }, 600);
+
+            // Phase 2: Transiting Across Sky (Parabolic Arc to the center)
+            setTimeout(() => {
+                launchBtn.textContent = "EN-ROUTE (MACH 1.2 Cruise)...";
+                simDrone.style.left = "230px";
+                simDrone.style.bottom = "320px";
+                simDrone.style.transform = "rotate(0deg)";
+            }, 1800);
+
+            // Phase 3: Descending Near Balcony (Right side)
+            setTimeout(() => {
+                launchBtn.textContent = "AUTOLOCK BALCONY GRID...";
+                simDrone.style.left = "430px";
+                simDrone.style.bottom = "240px";
+                simDrone.style.transform = "rotate(-8deg)";
+            }, 3000);
+
+            // Phase 4: Stable Hover and Winching Pod down (Alignment)
+            setTimeout(() => {
+                launchBtn.textContent = "STABLE HOVER. DEPLOYING WINCH...";
+                simDrone.style.transform = "rotate(0deg)";
+                
+                // Show thermal box under drone and winch wire extends
+                simBox.style.transform = "translateX(-50%) scale(1)";
+                winchWire.style.height = "118px";
+            }, 4200);
+
+            // Phase 5: Landing complete, disconnect, lift wire, open receipts
+            setTimeout(() => {
+                launchBtn.textContent = "DELIVERY MATRIX COMPLETE!";
+                simDrone.classList.remove('flying');
+
+                // Fill receipt details dynamically
+                receiptPayload.textContent = selectedDosa;
+                receiptCrunch.textContent = isHyperMode 
+                    ? (parseFloat(selectedCrunch) + 0.3).toFixed(1) + "% (Piping Hot Mach-Pod)"
+                    : selectedCrunch + " (Perfect Crunch)";
+                receiptVelocity.textContent = isHyperMode ? "Mach 2.2 Turbo Grid Lock" : "Mach 1.2 Optimized Flight";
+
+                // Show Success holographic receipt modal
+                successModal.classList.add('show');
+            }, 5600);
+        });
+
+        // Close simulated receipt and reset drone
+        closeBtn.addEventListener('click', () => {
+            successModal.classList.remove('show');
+            
+            // Reset autopilot console button
+            launchBtn.disabled = false;
+            launchBtn.textContent = "Delever Dosa Now";
+            launchBtn.style.opacity = "1";
+
+            // Snap drone back to starting pad smoothly
+            winchWire.style.height = "0px";
+            simBox.style.transform = "translateX(-50%) scale(0)";
+            
+            // Move drone back to coordinate (left launch pad)
+            simDrone.style.left = "36px";
+            simDrone.style.bottom = "38px";
+            simDrone.style.transform = "rotate(0deg)";
+
+            setTimeout(() => {
+                isAnimating = false;
+            }, 800);
+        });
+
+        /* -------------------------------------------------------------
+           PRICING CARD SUBSCRIPTION FREQUENCY TOGGLER
+           ------------------------------------------------------------- */
+        const billingToggleBtn = document.getElementById('billing-toggle-btn');
+        const labelMonthly = document.getElementById('label-monthly');
+        const labelAnnual = document.getElementById('label-annual');
+        const priceStandard = document.getElementById('price-standard');
+        const pricePremium = document.getElementById('price-premium');
+
+        let isAnnualBilling = false;
+
+        function toggleBilling() {
+            isAnnualBilling = !isAnnualBilling;
+            billingToggleBtn.classList.toggle('annual');
+            labelMonthly.classList.toggle('active');
+            labelAnnual.classList.toggle('active');
+
+            if (isAnnualBilling) {
+                // Calculate 20% discount (annual payment equivalent / mo)
+                animatePrice(priceStandard, 799);
+                animatePrice(pricePremium, 1999);
+            } else {
+                animatePrice(priceStandard, 999);
+                animatePrice(pricePremium, 2499);
+            }
+        }
+
+        billingToggleBtn.addEventListener('click', toggleBilling);
+        labelMonthly.addEventListener('click', () => { if(isAnnualBilling) toggleBilling(); });
+        labelAnnual.addEventListener('click', () => { if(!isAnnualBilling) toggleBilling(); });
+
+        // Smooth text transition numeric count animations
+        function animatePrice(element, targetVal) {
+            const startVal = parseInt(element.textContent.replace(/,/g, ''));
+            const duration = 400; // ms
+            const startTime = performance.now();
+
+            function updatePrice(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Ease out quad
+                const easeProgress = progress * (2 - progress);
+                const currentVal = Math.round(startVal + (targetVal - startVal) * easeProgress);
+                
+                element.textContent = currentVal.toLocaleString('en-IN');
+
+                if (progress < 1) {
+                    requestAnimationFrame(updatePrice);
+                }
+            }
+            requestAnimationFrame(updatePrice);
+        }
+    </script>
+</body>
+</html>
